@@ -21,6 +21,7 @@ written_digits = (
     "ten",
 )
 
+
 def parse(v):
     """
     >>> parse("1abc2")
@@ -51,6 +52,7 @@ def parse(v):
 
 if testing:
     import doctest
+
     doctest.testmod()
 
 result = 0
