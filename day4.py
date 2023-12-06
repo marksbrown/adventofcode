@@ -16,17 +16,25 @@ def parse_row(row):
     return left, middle, right
 
 
-data = {}
-total_points = 0
+extra_cards = {}
+total = 0
 for row in load_data_gen(fn, testing):
     k, m, r = parse_row(row)
-    n = m.intersection(r)
-    if not len(n):
-        points = 0
+    if k in extra_cards:
+        extra_cards[k] += 1
     else:
-        points = 2 ** (len(m.intersection(r)) - 1)
+        extra_cards[k] = 1  # we only have one of this card
+    print("start", extra_cards)
+    n = m.intersection(r)
+    wins = len(n)
+    for j in range(k + 1, k + wins + 1):
+        if j not in extra_cards:
+            extra_cards[j] = extra_cards[k]
+        else:
+            extra_cards[j] += extra_cards[k]
 
-    data[k] = {"winning": m, "found": r, "points": points}
-    total_points += points
+    print(f"Card {k} has {wins} wins and there are {extra_cards[k]} cards")
+    print("end", extra_cards)
+    total += extra_cards.pop(k)
 
-print(f"Total points found is {total_points}")
+print(total)
