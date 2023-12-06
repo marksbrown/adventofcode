@@ -9,4 +9,5 @@ def load_data_gen(fn, testing=False):
     with x as f:
         for row in f:
             row = row.strip("\n")
-            yield row
+            if row:
+                yield row
