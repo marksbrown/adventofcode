@@ -2,14 +2,44 @@ from useful import load_data_gen
 import turtle as tl
 from time import sleep
 from itertools import zip_longest
-from math import sqrt
+from math import sqrt, gcd, floor
 
 tl.tracer(0, 0)
 tl.hideturtle()
 
 fn = "day6"
 testing = False
-verbose = False
+verbose = True
+
+
+def ceiling(v):
+    """
+    >>> ceiling(14.2)
+    15
+    >>> ceiling(14.0001)
+    15
+    >>> ceiling(14.999)
+    15
+    """
+    if v > floor(v):
+        return floor(v) + 1
+    else:
+        return floor(v)
+
+
+import doctest
+
+doctest.testmod()
+
+
+def actual_solve(d, T):
+    """
+    Of course this is a trivial physics problem so let's just solve it that way
+    """
+    dt = sqrt(T**2 - 4 * d)
+    t2 = (T + dt) / 2
+    t1 = (T - dt) / 2
+    return t1, t2
 
 
 def goto(t, pos):
@@ -173,16 +203,48 @@ def load_data():
         yield name, values
 
 
+partA = False
 raw = {k: v for k, v in load_data()}
 
 data = []
-for k in raw:
-    data.append(raw[k])
+if partA:
+    for k in raw:
+        data.append(raw[k])
+else:
+    actual_time = int("".join(map(str, raw["Time"])))
+    actual_dist = int("".join(map(str, raw["Distance"])))
+    data.append(
+        [
+            actual_time,
+        ]
+    )
+    data.append(
+        [
+            actual_dist,
+        ]
+    )
+
 
 result = 1
+easier_result = 1
+skip_old_method = True
 for time, dist in zip(*data):
-    r = get_winning_moves(dist, time)
-    result *= r
+    print(time, dist)
+    if not skip_old_method:
+        r = get_winning_moves(dist, time)
+        print(f"Brute force solution is {r}")
+        result *= r
+    t1, t2 = actual_solve(dist, time)
+    print(f"Analytical solution provides {t1} and {t2}")
+    w_high = ceiling(t2) - floor(t1)
+    w_low = floor(t2) - ceiling(t1)
+    print(f"Giving a possible range of {w_low} to {w_high}")
+    if w_low == w_high:
+        w = w_low - 1
+    else:
+        w = (w_low + w_high) // 2
+    easier_result *= w
 
-print(result)
-tl.exitonclick()
+print(result, easier_result)
+if not skip_old_method:
+    tl.exitonclick()
