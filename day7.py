@@ -4,7 +4,7 @@ from useful import load_data_gen
 fn = "day7"
 testing = False
 
-cards = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]
+cards = ["A", "K", "Q", "T", "9", "8", "7", "6", "5", "4", "3", "2", "J"]
 # lowest index is highest strength
 
 
@@ -157,6 +157,19 @@ tests = (
 def get_hand_type(hand):
     global tests
     N = len(tests)
+    if "J" in hand:
+        best_result = 0
+        for r in cards:
+            if r == "J":
+                continue
+            fake_hand = hand.replace("J", r)
+            new_result = get_hand_type(fake_hand)
+            if new_result > best_result:
+                best_result = new_result
+                best_hand = fake_hand
+
+        return best_result
+    # no jokers present so continue
     for j, t in enumerate(tests):
         r = t(hand)
         if r:
