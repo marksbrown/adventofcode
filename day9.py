@@ -19,7 +19,11 @@ def arith_next(seq):
     return (prev - pprev) + prev
 
 
-def next_in_sequence(seq, last_term=None):
+def prev_in_sequence(seq):
+    return next_in_sequence(seq[::-1])
+
+
+def next_in_sequence(seq):
     """
     Determine next in sequence for a polynomial sequence
     (arithmetic, quadratic, ...)
@@ -51,12 +55,16 @@ if testing:
 
     doctest.testmod()
 
-total = 0
+first_total = 0
+second_total = 0
 for seq in sequences:
     r = next_in_sequence(seq)
-    total += r
+    first_total += r
+    w = prev_in_sequence(seq)
+    second_total += w
     if verbose:
         print(seq, *get_next_sequence(seq), sep=" -> ")
-        print(next_in_sequence(seq))
+        print("prev in sequence", w)
+        print("next in sequence", r)
 
-print(f"The total is {total}")
+print(f"The totals are {first_total}, {second_total}")
