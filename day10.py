@@ -11,6 +11,7 @@ The pipes are arranged in a two-dimensional grid of tiles:
     S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
 """
 from useful import load_data_gen
+from shapely import geometry
 
 fn = "day10"
 testing = False
@@ -73,10 +74,6 @@ def maze_to_graph(maze):
     return graph
 
 
-def is_loop(path):
-    return path[0] == path[-1]
-
-
 def flood_fill(graph, start_at):
     paths = [[start_at, k] for k in graph[start_at]]
     loop_found = False
@@ -99,10 +96,85 @@ def flood_fill(graph, start_at):
     return paths[-1]
 
 
+def extent(coords):
+    first, *coords = coords
+    minx = maxx = first[0]
+    miny = maxy = first[1]
+
+    for x, y in coords:
+        if x < minx:
+            minx = x
+        elif x > maxx:
+            maxx = x
+        if y < miny:
+            miny = y
+        elif y > maxy:
+            maxy = y
+
+    return (minx, maxx), (miny, maxy)
+
+
+def interior_coords(coords):
+    """
+    Give all possible coordinates inside the extent
+    but not in the loop itself
+    """
+    (x1, x2), (y1, y2) = extent(r)
+    for x in range(x1 - 1, x2 + 2):
+        for y in range(y1 - 1, y2 + 2):
+            if (x, y) not in coords:
+                yield x, y
+
+
 for maze in get_raw_maze():
     print(*maze, sep="\n")
+    print(len(maze), len(maze[0]))
     graph = maze_to_graph(maze)
     r = flood_fill(graph, graph["start"])
-    print(r)
     N = (len(r) - 1) // 2
     print("Furthest away is ", N)
+
+
+## Part B
+import turtle as tl
+
+tl.tracer(0, 0)
+
+if testing:
+    step = 15
+else:
+    step = 2
+
+
+def dot(x, y, step, col="green"):
+    tl.penup()
+    tl.goto(x * step, y * step)
+    tl.pendown()
+    tl.pencolor(col)
+    tl.dot()
+
+
+line = geometry.LineString(r)
+loop = geometry.Polygon(line)
+for j, (x, y) in enumerate(r):
+    if not j:
+        tl.penup()
+    tl.goto(x * step, y * step)
+    if not j:
+        tl.pendown()
+
+count = 0
+for coord in interior_coords(r):
+    p = geometry.Point(*coord)
+    t = loop.contains(p)
+    if t:
+        col = "red"
+        count += 1
+    else:
+        col = "green"
+    dot(*coord, step, col)
+    tl.update()
+
+print(f"There are {count} hiding places!")
+
+tl.exitonclick()
