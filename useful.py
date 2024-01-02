@@ -11,3 +11,5 @@ def load_data_gen(fn, testing=False):
             row = row.strip("\n")
             if row:
                 yield row
+            else:
+                yield "="
