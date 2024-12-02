@@ -26,8 +26,8 @@ def is_match(left, right):
 
 
 fn = "day12"
-testing = False
-verbose = False
+testing = True
+verbose = True
 
 
 def load_data():
@@ -52,6 +52,9 @@ def count_repetitions(seq):
     yield prev, count
 
 
+def count(seq, to_match):
+    return tuple(count for sym, count in count_repetitions(seq) if sym == to_match)
+
 def count_defective(seq):
     """
     >>> count_defective("#.#.###")
@@ -59,8 +62,13 @@ def count_defective(seq):
     >>> count_defective(".#.###.#.######")
     (1, 3, 1, 6)
     """
-    return tuple(count for sym, count in count_repetitions(seq) if sym == "#")
+    return count(seq, "#")
 
+def count_unknown(seq):
+    return count(seq, "?")
+
+def count_working(seq):
+    return count(seq, "#")
 
 def generate_all_cases(seq):
     """
@@ -94,9 +102,14 @@ if testing:
 # left - str sequence of .#?
 # right - int sequence of expected repetitions
 
+def extend(left, right, repeats=1):
+    return "?".join([left,]*repeats), right * repeats
+
 total = 0
 for left, right in load_data():
     arrangements = 0
+    print("Unknown sequences", count_unknown(left))
+    print("Working sequences", count_working(left))
     for candidate in generate_all_cases(left):
         if count_defective(candidate) == right:
             arrangements += 1
@@ -105,5 +118,5 @@ for left, right in load_data():
     if verbose:
         print(left, right, arrangements)
     total += arrangements
-
-print(f"This gives a total of {total}")
+    print("=======")
+#print(f"This gives a total of {total}")
