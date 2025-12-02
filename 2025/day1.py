@@ -20,14 +20,27 @@ count = 0
 with open(fn) as f:
     for line in f:
         t, v = parse(line)
+        turns, v = divmod(v, 100)
+        count += turns
         if t == "L":
-            dial_position = (dial_position - v) % 100
+            new_dial_position = dial_position - v
         elif t == "R":
-            dial_position = (dial_position + v) % 100
+            new_dial_position = dial_position + v
         else:
             raise ("wat")
 
-        if not dial_position:
+        # count passing zero, not landing on it
+        # case 1 - pass 0 to the left
+        alt = False
+        if new_dial_position <= 0 and dial_position > 0:
+            alt = True
+
+        # case 2 - pass 0 to the right
+        if new_dial_position >= 100:
+            alt = True
+
+        dial_position = new_dial_position % 100
+        if alt:
             count += 1
 
 print(count)
