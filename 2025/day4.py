@@ -5,33 +5,47 @@ else:
     fn = "data/day4"
 
 
-rolls = []
-lim = []
-
-with open(fn) as f:
-    for j, row in enumerate(f):
-        row = row.strip("\n")
-        for i, sym in enumerate(row):
-            if sym == "@":
-                rolls.append((i, j))
-    lim = [i, j]
-
-
-def count_adj(x, y):
-    global lim
-    c = 0
+def total_adj(rolls, i, j, limx, limy):
+    t = 0
+    if not rolls[i][j]:
+        return -1
     for di in (-1, 0, 1):
         for dj in (-1, 0, 1):
             if not di and not dj:
                 continue
-            i = x + di
-            j = y + dj
-            if 0 <= i <= lim[0] and 0 <= j <= lim[1]:
-                if (i, j) in rolls:
-                    c += 1
-    return c
+            x = i + di
+            y = j + dj
+            if 0 <= x < limx and 0 <= y < limy:
+                t += rolls[x][y]
+    return t
 
 
-max_rolls = 4
-valid = sum(count_adj(*c) < max_rolls for c in rolls)
-print(f"There are {valid} valid rolls")
+rolls = []
+
+with open(fn) as f:
+    for row in f:
+        row = row.strip("\n")
+        rolls.append([1 if sym == "@" else 0 for sym in row])
+
+print(*rolls, sep="\n")
+
+limy = len(rolls)
+limx = len(rolls[0])
+
+adj = [[0 for _ in range(limx)] for _ in range(limy)]
+total = 0
+max_adj = 4
+
+j = 0
+while j < limy:
+    i = 0
+    while i < limx:
+        t = total_adj(rolls, i, j, limx, limy)
+        if 0 <= t < max_adj:
+            total += 1
+        adj[i][j] += t
+        i += 1
+    j += 1
+
+print("", *adj, sep="\n")
+print(f"There are {total} rolls adjacent with less than {max_adj} neighbours")
