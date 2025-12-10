@@ -8,26 +8,30 @@ else:
     fn = "data/day3"
 
 
-def find_maximum_joltage(seq: str):
-    if len(seq) < 2:
-        return 0
+def find_maximum_joltage(seq: list, cells: int):
+    seq = list(seq)
+    r = []
+    while len(r) < cells:
+        vmax = 9
+        while vmax:
+            if str(vmax) in seq:
+                l = seq.index(str(vmax))
+                if l + cells - len(r) <= len(seq):
+                    r.append(str(vmax))
+                    seq = seq[l + 1 :]
+                    break
+            vmax -= 1
 
-    l = 0
-    l = seq.index(max(seq[:-1]))
-    max_joltage = seq[l] + seq[l + 1]
-    for r in range(l + 1, len(seq)):
-        nv = seq[l] + seq[r]
-        if nv > max_joltage:
-            max_joltage = nv
-
-    return max_joltage
+    return r
 
 
 total_joltage = 0
 with open(fn) as f:
     for voltages in f:
         voltages = voltages.strip("\n")
-        v = int(find_maximum_joltage(voltages))
-        print(voltages, v)
+        print("Initial:", voltages, "->", end=" ")
+        v = find_maximum_joltage(voltages, cells=12)
+        v = int("".join(v))
+        print(v)
         total_joltage += v
 print(total_joltage)
