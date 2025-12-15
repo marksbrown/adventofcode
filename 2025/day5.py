@@ -1,4 +1,5 @@
 import heapq
+from itertools import pairwise
 
 testing = False
 
@@ -49,6 +50,9 @@ class Interval:
         cases = self.get_cases(other)
         return all(cases[-2:])
 
+    def total(self) -> int:
+        return self.high - self.low + 1
+
 
 ranges = []
 ids = []
@@ -66,6 +70,21 @@ with open(fn) as f:
             ids.append(line)
 
 
+def union_intervals(intervals):
+    for j, left in enumerate(intervals):
+        for right in intervals:
+            if left == right:
+                continue
+
+            if left.any_overlap(right):
+                new_interval = left.union(right)
+                intervals[j] = new_interval
+                intervals.pop(intervals.index(right))
+                return True, intervals
+
+    return False, intervals
+
+
 for j, r in enumerate(ranges):
     if not j:
         intervals = [
@@ -75,16 +94,13 @@ for j, r in enumerate(ranges):
         continue
 
     interval = Interval(*r)
-    j = 0
-    while j < len(intervals):
-        if intervals[j].any_overlap(interval):
-            intervals[j] = intervals[j].union(interval)
-            break
-        j += 1
-    else:
-        heapq.heappush(intervals, interval)
+    heapq.heappush(intervals, interval)
 
-print(sorted(intervals))
+modified = True
+while modified:
+    modified, intervals = union_intervals(intervals)
+
+print(*sorted(intervals), sep="\n")
 
 
 def check_intervals(intervals, value):
@@ -94,6 +110,10 @@ def check_intervals(intervals, value):
     return False
 
 
+## part A
 fresh = sum((check_intervals(intervals, int(i)) for i in ids))
-
 print(f"There are {fresh} fresh ingredients")
+
+## part B
+count_fresh = sum((interval.total() for interval in intervals))
+print(f"There are {count_fresh} total fresh ingredients available")
