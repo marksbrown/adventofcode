@@ -21,50 +21,50 @@ dims = (len(line), j)
 
 class Tachyon:
     def __init__(self, current_state, obstacles):
-        self.current_state = current_state
+        print(current_state)
+        self.current_state = [1 if elem == "|" else 0 for elem in current_state]
         self.obstacles = obstacles
         self.current_y = 0
-        self.count = 0
+
+    @property
+    def count(self):
+        return sum(self.current_state[j] for j in range(self.width))
 
     @property
     def width(self):
         return len(self.current_state)
 
     def collision(self, x):
-        return x in self.obstacles[self.current_y + 1]
-
-    def split(self, x):
-        pass
+        if self.current_y + 1 < dims[1]:
+            return x in self.obstacles[self.current_y + 1]
+        else:
+            return False
 
     def step(self):
-        if self.current_y >= dims[1]:
-            return 0
+        collisions = [
+            j
+            for j, active in enumerate(self.current_state)
+            if active and self.collision(j)
+        ]
 
-        next_state = [
-            0,
-        ] * self.width
-        for j, current in enumerate(self.current_state):
-            if current == "|":
-                if self.collision(j):
-                    self.count += 1
-                    if j > 0:
-                        next_state[j - 1] = "|"
-                    if j < self.width:
-                        next_state[j + 1] = "|"
-                else:
-                    next_state[j] = current
+        for j in collisions:
+            if j > 1:
+                self.current_state[j - 1] += self.current_state[j]
+            if j < self.width:
+                self.current_state[j + 1] += self.current_state[j]
+            self.current_state[j] = 0
 
         self.current_y += 1
-        self.current_state = next_state
 
     def __repr__(self):
-        str_state = list(self.current_state)
+        r = [str(elem).zfill(2) for elem in self.current_state]
+        r = [elem if elem[-1] != "0" else "  " for elem in r]
         for obstacle in self.obstacles.get(self.current_y, []):
-            str_state[obstacle] = "^"
-        return "".join(map(str, str_state))
+            r[obstacle] = "^^"
+        return str(r)
 
 
 t = Tachyon(start_line, obstacles)
-for i in range(dims[1] + 5):
+for i in range(dims[1] + 1):
     print(f"{i:2}", "::", t, "::", t.count)
     t.step()
